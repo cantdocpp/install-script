@@ -31,4 +31,8 @@ if ! [ -x "$(command -v psql)" ]; then
     echo -e "Installing postgresql"
     sudo apt install -y postgresql-common
     sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+    
 fi
+
+sudo apt-get update
+sudo apt-get install postgresql-client-16
