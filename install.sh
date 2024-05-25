@@ -64,7 +64,10 @@ fi
 
 if ! [ -x "$(command -v node)" ]; then
     # installs nvm (Node Version Manager)
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | sh
+
+    source ~/.bashrc
+    
     # download and install Node.js
     nvm install 20
     # verifies the right Node.js version is in the environment
