@@ -55,6 +55,7 @@ EOF
 
     sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/$PG_VERSION/main/postgresql.conf
     echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a /etc/postgresql/$PG_VERSION/main/pg_hba.conf
+    sudo sed -i "s/^#timezone =.*$/timezone = 'Asia/Jakarta'/" /etc/postgresql/$PG_VERSION/main/postgresql.conf
     sudo systemctl restart postgresql
 
     echo "PostgreSQL installation and configuration complete."
@@ -67,6 +68,7 @@ if ! [ -x "$(command -v node)" ]; then
     curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | sh
 
     source ~/.bashrc
+    source ~/.nvm/nvm.sh
     
     # download and install Node.js
     nvm install 20
@@ -74,6 +76,7 @@ if ! [ -x "$(command -v node)" ]; then
     node -v # should print `v20.13.1`
     # verifies the right NPM version is in the environment
     npm -v # should print `10.5.2`
+    nvm cache clear
 fi
 
 if ! [ -x "$(command -v pm2)" ]; then
