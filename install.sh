@@ -82,3 +82,6 @@ fi
 if ! [ -x "$(command -v pm2)" ]; then
     npm install pm2 -g
 fi
+
+# set timezone to jakarta
+sudo timedatectl set-timezone Asia/Jakarta
