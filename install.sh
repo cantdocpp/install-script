@@ -68,9 +68,6 @@ if ! [ -x "$(command -v node)" ]; then
     export HOME=/home/ubuntu
     # installs nvm (Node Version Manager)
     curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-
-    source ~/.bashrc
-    source ~/.nvm/nvm.sh
     
     # download and install Node.js
     nvm install 20
@@ -79,6 +76,9 @@ if ! [ -x "$(command -v node)" ]; then
     # verifies the right NPM version is in the environment
     npm -v # should print `10.5.2`
     nvm cache clear
+
+    source ~/.bashrc
+    source ~/.nvm/nvm.sh
 fi
 
 if ! [ -x "$(command -v pm2)" ]; then
