@@ -100,3 +100,5 @@ if ! [ -x "$(command -v nginx)" ]; then
     sudo apt install nginx
     sudo nginx
 fi
+
+source ~/.bashrc
