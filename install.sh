@@ -109,6 +109,72 @@ if ! [ -x "$(command -v nginx)" ]; then
     ./configure --add-module=../nginx-rtmp-module-master --with-http_ssl_module
     make
     sudo make install
+
+    # Create Nginx configuration
+    sudo tee /usr/local/nginx/conf/nginx.conf > /dev/null <<EOL
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+rtmp {
+    server {
+        listen 1935;
+        chunk_size 4096;
+
+        application live {
+            live on;
+            record off;
+        }
+    }
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    include /usr/local/nginx/conf.d/*.conf;
+    include /usr/local/nginx/sites-enabled/*;
+}
+EOL
+
+    # Create directories for site configurations
+    sudo mkdir -p /usr/local/nginx/sites-available
+    sudo mkdir -p /usr/local/nginx/sites-enabled
+    sudo mkdir -p /usr/local/nginx/conf.d
+
+    # Create a sample site configuration
+    sudo tee /usr/local/nginx/sites-available/livestream.gbotipster.net > /dev/null <<EOL
+server {
+    listen 80;
+    server_name livestream.gbotipster.net;
+
+    location / {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /live {
+        proxy_pass http://localhost:1935;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOL
+
+    # Enable the site configuration
+    sudo ln -s /usr/local/nginx/sites-available/livestream.gbotipster.net /usr/local/nginx/sites-enabled/
+    sudo /usr/local/nginx/sbin/nginx
+    sudo systemctl enable nginx
 fi
 
 source ~/.bashrc
