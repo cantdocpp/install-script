@@ -67,8 +67,9 @@ fi
 if ! [ -x "$(command -v node)" ]; then
     export HOME=/home/ubuntu
     # installs nvm (Node Version Manager)
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    su - ubuntu -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
 
+    source ~/.bash_profile
     source ~/.bashrc
     source ~/.nvm/nvm.sh
     
