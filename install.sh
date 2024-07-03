@@ -95,12 +95,20 @@ sudo timedatectl set-timezone Asia/Jakarta
 # install nginx
 # https://stackoverflow.com/questions/66076321/whats-the-purpose-of-ppaondrej-nginx
 if ! [ -x "$(command -v nginx)" ]; then
-    sudo apt install -y software-properties-common
-    sudo add-apt-repository -y ppa:ondrej/nginx
     sudo apt update
-    sudo apt install -y nginx nginx-module-rtmp
-    sudo systemctl start nginx
-    sudo systemctl enable nginx
+    sudo apt install -y build-essential libpcre3 libpcre3-dev libssl-dev zlib1g-dev wget unzip
+
+    # Download Nginx and RTMP module source
+    wget http://nginx.org/download/nginx-1.21.4.tar.gz
+    wget https://github.com/arut/nginx-rtmp-module/archive/master.zip
+    tar -zxvf nginx-1.21.4.tar.gz
+    unzip master.zip
+
+    # Compile Nginx with RTMP module
+    cd nginx-1.21.4
+    ./configure --add-module=../nginx-rtmp-module-master --with-http_ssl_module
+    make
+    sudo make install
 fi
 
 source ~/.bashrc
