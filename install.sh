@@ -83,10 +83,13 @@ if ! [ -x "$(command -v node)" ]; then
     # verifies the right NPM version is in the environment
     npm -v # should print `10.5.2`
     nvm cache clear+
+
     source ~/.bash_profile
+    source ~/.bashrc
+    source ~/.nvm/nvm.sh
 fi
 
-if ! [ -x "$(command -v pm2)" ]; then00
+if ! [ -x "$(command -v pm2)" ]; then
     npm install pm2 -g
 fi
 
@@ -96,8 +99,9 @@ sudo timedatectl set-timezone Asia/Jakarta
 # install nginx
 # https://stackoverflow.com/questions/66076321/whats-the-purpose-of-ppaondrej-nginx
 if ! [ -x "$(command -v nginx)" ]; then
+    sudo apt update
     # NGINX is a program written in C, so you will first need to install a compiler tool such as the GNU Compiler Collection (GCC)
-    sudo apt-get install build-essentials
+    sudo apt-get install build-essential
     #The Perl Compatible Regular Expressions (PCRE) library is required for compiling NGINX. The rewrite and HTTP core modules of NGINX use PCRE for the syntax of their regular expressions
     sudo apt install libpcre3 libpcre3-dev
     # The zlib library provides developers with compression algorithms. It is required for the use of .gzip compression in various modules of NGINX
@@ -113,7 +117,30 @@ if ! [ -x "$(command -v nginx)" ]; then
     git clone https://github.com/arut/nginx-rtmp-module.git
 
     cd ./nginx-1.25.2
-    ./configure --add-module=../nginx-rtmp-module --with-http_ssl_module
+    ./configure --add-module=../nginx-rtmp-module --with-http_ssl_module --conf-path=/etc/nginx/nginx.conf
+    make
+    make install
+
+    sudo tee /etc/systemd/system/nginx.service > /dev/null <<EOL
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network-online.target
+Wants=network-online.target
+[Service]
+Type=forking
+PIDFile=/usr/local/nginx/logs/nginx.pid
+ExecStartPre=/usr/local/nginx/sbin/nginx -t
+ExecStart=/usr/local/nginx/sbin/nginx
+ExecReload=/usr/local/nginx/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target
+EOL
+
+    sudo systemctl daemon-reload
+    sudo systemctl start nginx
+    sudo systemctl status nginx
 fi
 
 source ~/.bashrc
