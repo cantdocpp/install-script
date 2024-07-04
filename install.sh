@@ -82,10 +82,11 @@ if ! [ -x "$(command -v node)" ]; then
     node -v # should print `v20.13.1`
     # verifies the right NPM version is in the environment
     npm -v # should print `10.5.2`
-    nvm cache clear
+    nvm cache clear+
+    source ~/.bash_profile
 fi
 
-if ! [ -x "$(command -v pm2)" ]; then
+if ! [ -x "$(command -v pm2)" ]; then00
     npm install pm2 -g
 fi
 
@@ -95,86 +96,24 @@ sudo timedatectl set-timezone Asia/Jakarta
 # install nginx
 # https://stackoverflow.com/questions/66076321/whats-the-purpose-of-ppaondrej-nginx
 if ! [ -x "$(command -v nginx)" ]; then
-    sudo apt update
-    sudo apt install -y build-essential libpcre3 libpcre3-dev libssl-dev zlib1g-dev wget unzip
+    # NGINX is a program written in C, so you will first need to install a compiler tool such as the GNU Compiler Collection (GCC)
+    sudo apt-get install build-essentials
+    #The Perl Compatible Regular Expressions (PCRE) library is required for compiling NGINX. The rewrite and HTTP core modules of NGINX use PCRE for the syntax of their regular expressions
+    sudo apt install libpcre3 libpcre3-dev
+    # The zlib library provides developers with compression algorithms. It is required for the use of .gzip compression in various modules of NGINX
+    apt install zlib1g zlib1g-dev
+    # openssl
+    apt install openssl libssl-dev
 
-    # Download Nginx and RTMP module source
-    wget http://nginx.org/download/nginx-1.21.4.tar.gz
-    wget https://github.com/arut/nginx-rtmp-module/archive/master.zip
-    tar -zxvf nginx-1.21.4.tar.gz
-    unzip master.zip
+    # download nginx
+    wget https://nginx.org/download/nginx-1.25.2.tar.gz
+    tar zxf nginx-1.25.2.tar.gz
 
-    # Compile Nginx with RTMP module
-    cd nginx-1.21.4
-    ./configure --add-module=../nginx-rtmp-module-master --with-http_ssl_module
-    make
-    sudo make install
+    # download nginx rtmp module
+    git clone https://github.com/arut/nginx-rtmp-module.git
 
-    # Create Nginx configuration
-    sudo tee /usr/local/nginx/conf/nginx.conf > /dev/null <<EOL
-worker_processes auto;
-
-events {
-    worker_connections 1024;
-}
-
-rtmp {
-    server {
-        listen 1935;
-        chunk_size 4096;
-
-        application live {
-            live on;
-            record off;
-        }
-    }
-}
-
-http {
-    include       mime.types;
-    default_type  application/octet-stream;
-
-    sendfile        on;
-    keepalive_timeout  65;
-
-    include /usr/local/nginx/conf.d/*.conf;
-    include /usr/local/nginx/sites-enabled/*;
-}
-EOL
-
-    # Create directories for site configurations
-    sudo mkdir -p /usr/local/nginx/sites-available
-    sudo mkdir -p /usr/local/nginx/sites-enabled
-    sudo mkdir -p /usr/local/nginx/conf.d
-
-    # Create a sample site configuration
-    sudo tee /usr/local/nginx/sites-available/livestream.gbotipster.net > /dev/null <<EOL
-server {
-    listen 80;
-    server_name livestream.gbotipster.net;
-
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
-    location /live {
-        proxy_pass http://localhost:1935;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}
-EOL
-
-    # Enable the site configuration
-    sudo ln -s /usr/local/nginx/sites-available/livestream.gbotipster.net /usr/local/nginx/sites-enabled/
-    sudo /usr/local/nginx/sbin/nginx
-    sudo systemctl enable nginx
+    cd ./nginx-1.25.2
+    ./configure --add-module=../nginx-rtmp-module --with-http_ssl_module
 fi
 
 source ~/.bashrc
