@@ -121,6 +121,8 @@ if ! [ -x "$(command -v nginx)" ]; then
     make
     make install
 
+    sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+
     sudo tee /etc/systemd/system/nginx.service > /dev/null <<EOL
 [Unit]
 Description=The NGINX HTTP and reverse proxy server
