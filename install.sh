@@ -122,6 +122,10 @@ if ! [ -x "$(command -v nginx)" ]; then
     make install
 
     sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+    sudo mkdir -p /var/log/nginx
+    sudo touch /var/log/nginx/antamindo.click.access.log
+    sudo touch /var/log/nginx/antamindo.click.error.log
+    sudo chown -R www-data:www-data /var/log/nginx
 
     sudo tee /etc/systemd/system/nginx.service > /dev/null <<EOL
 [Unit]
