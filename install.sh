@@ -87,6 +87,8 @@ if ! [ -x "$(command -v node)" ]; then
     source ~/.bash_profile
     source ~/.bashrc
     source ~/.nvm/nvm.sh
+
+    sudo chown -R "$(whoami):$(whoami)" "$(npm config get prefix)"
 fi
 
 if ! [ -x "$(command -v pm2)" ]; then
